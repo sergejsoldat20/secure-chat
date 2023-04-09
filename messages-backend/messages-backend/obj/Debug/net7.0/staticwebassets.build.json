@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "i843MMiw+3YKxnGQRUXaHwRqeCuhde2/17A9KnqlS7w=",
+  "Source": "messages-backend",
+  "BasePath": "_content/messages-backend",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}
