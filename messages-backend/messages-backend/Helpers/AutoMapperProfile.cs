@@ -9,8 +9,8 @@ namespace messages_backend.Helpers
         public AutoMapperProfile() 
         {
             CreateMap<Account, AuthenticateResponse>();
-            CreateMap<Account, AccountResponse>();
             CreateMap<RegisterRequest, Account>();
+            CreateMap<Account, AccountResponse>();
         }
     }
 }

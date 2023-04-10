@@ -9,13 +9,17 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.Extensions.Options;
+using messages_backend.Data;
 
 namespace messages_backend.Services
 {
     public interface IAccountService
     {
+        string GetMainKey(Guid userId);
+        string GetComainKey(Guid userId);
         AuthResponse Authenticate(AuthenticateRequest request);
         RegisterEnum Register(RegisterRequest request);
+        List<AccountResponse> GetAccounts();
     }
     public class AccountService : IAccountService
     {
@@ -53,10 +57,38 @@ namespace messages_backend.Services
 
             string jwtToken = GenerateJwtToken(account);
             var response = new AuthResponse();
-            response.JwtToken = jwtToken;
+            response.AccessToken = jwtToken;
             
             return response;
+        }
 
+        public List<AccountResponse> GetAccounts()
+        {
+            throw new NotImplementedException();
+        }
+
+        public string GetComainKey(Guid userId)
+        {
+            var user = _context
+                .Accounts
+                .FirstOrDefault(x => x.Id == userId);
+            if (user == null)
+            {
+                throw new AppException("User not found");
+            }
+            return user.ComainRSAKey;
+        }
+
+        public string GetMainKey(Guid userId)
+        {
+            var user = _context
+                .Accounts
+                .FirstOrDefault(x => x.Id == userId);
+            if (user == null)
+            {
+                throw new AppException("User not found");
+            }
+            return user.MainRSAKey;
         }
 
         public RegisterEnum Register(RegisterRequest request)
@@ -91,6 +123,7 @@ namespace messages_backend.Services
 
             _context.Add(account);
             _context.SaveChanges();
+
             return RegisterEnum.Success;
         }
 

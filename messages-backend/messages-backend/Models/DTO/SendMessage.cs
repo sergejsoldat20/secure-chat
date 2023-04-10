@@ -3,6 +3,6 @@
     public class SendMessage
     {
         public Guid ReceiverId { get; set; }
-        public byte[] Message { get; set; } = new byte[8];
+        public string Text { get; set; }
     }
 }

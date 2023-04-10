@@ -7,7 +7,7 @@ namespace messages_backend.Services
     public interface ICryptoService
     {
         string DecryptMessage(byte[] encryptedPart, RSAParameters RSAKeyInfo);
-        byte[] EncryptMessage(string messagePart, RSAParameters RSAKeyInfo);
+        byte[] EncryptMessage(byte[] messagePart, RSAParameters RSAKeyInfo);
         string GenerateRSA();
       
     }
@@ -34,10 +34,8 @@ namespace messages_backend.Services
             }
         }
 
-        public byte[] EncryptMessage(string messagePart, RSAParameters RSAKeyInfo)
+        public byte[] EncryptMessage(byte[] dataForEncryption, RSAParameters RSAKeyInfo)
         {
-            UnicodeEncoding ByteConverter = new UnicodeEncoding();
-            byte[] dataForEncryption = ByteConverter.GetBytes(messagePart);
             try
             {
                 byte[] encryptedData;

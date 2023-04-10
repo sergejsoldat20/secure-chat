@@ -1,7 +1,7 @@
 ﻿using messages_backend.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace messages_backend
+namespace messages_backend.Data
 {
     public class ApplicationDbContext : DbContext
     {
@@ -11,5 +11,6 @@ namespace messages_backend
         }
 
         public DbSet<Account> Accounts { get; set; }
+        public DbSet<Message> Messages { get; set; }    
     }
 }
