@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 
 namespace messages_backend.Controllers
 {
-    // [Authorize]
+    [Authorize]
     [ApiController]
     [Route("[controller]")]
     public class MessagesController : BaseController
@@ -27,8 +27,10 @@ namespace messages_backend.Controllers
         [HttpPost("send-message")]
         public IActionResult SendMessage(SendMessage payload) 
         {
-            var messagePartsEncrypted =  _messagesService.GetEncryptedMessageParts(payload);
-            // send this parts to M servers
+            // message will be divided and encrypted twice with RSA
+            var messagePartsEncrypted =  _messagesService.GetEncryptedMessageParts(payload, Account.Id);
+
+            // todo: send this parts to M servers
             return Ok();
         }
 
@@ -51,7 +53,9 @@ namespace messages_backend.Controllers
         [HttpGet("messages-for-chat/{id}")]
         public ActionResult<List<Message>> MessagesForChat(Guid id)
         {
+            // todo: get messages for chat by user id
             return Ok();
         }
+       
     }
 }

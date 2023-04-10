@@ -11,12 +11,11 @@ namespace messages_backend.Services
     {
         List<MessagePartition> DivideMessage(string message);
         Message ComposeMessage(List<MessagePartition> dividedMessage, Guid recieverId, Guid senderId);
-
         void SaveMessage(Message message);
-
-        List<byte[]> GetEncryptedMessageParts(SendMessage message);
-
+        List<byte[]> GetEncryptedMessageParts(SendMessage message, Guid senderId);
+        MessagePartition DecryptMessagePart(byte[] encryptedData, Guid senderId, Guid receiverId);
     }
+
     public class MessagesService : IMessagesService
     {
 
@@ -32,7 +31,9 @@ namespace messages_backend.Services
             _accountService = accountService;
             _cryptoService = cryptoService;
         }
-        public Message ComposeMessage(List<MessagePartition> dividedMessage, Guid recieverId, Guid senderId)
+
+        public Message ComposeMessage(List<MessagePartition> dividedMessage,
+            Guid recieverId, Guid senderId)
         {
             string messageText = string.Join("", dividedMessage.OrderBy(x => x.CurrentPart).ToList().Select(x => x.MessagePart));
             var message = new Message
@@ -42,6 +43,11 @@ namespace messages_backend.Services
                 Text = messageText
             };
             return message;
+        }
+
+        public MessagePartition DecryptMessagePart(byte[] encryptedData, Guid senderId, Guid receiverId)
+        {
+            throw new NotImplementedException();
         }
 
         public List<MessagePartition> DivideMessage(string message)
@@ -70,26 +76,37 @@ namespace messages_backend.Services
             return result;
         }
 
-        public List<byte[]> GetEncryptedMessageParts(SendMessage message)
+        public List<byte[]> GetEncryptedMessageParts(SendMessage message, Guid senderId)
         {
             UnicodeEncoding ByteEncoder = new UnicodeEncoding();
             var dividedMessage = DivideMessage(message.Text);
             var encryptedMessageParts = new List<byte[]>();    
-            using (RSACryptoServiceProvider RSA = new RSACryptoServiceProvider())
+            using (RSACryptoServiceProvider RSAReceiver = new RSACryptoServiceProvider())
             {
-                string RSAKeyString = _accountService.GetMainKey(message.ReceiverId);
-                RSA.FromXmlString(RSAKeyString);
+                string RSAReceiverKeyString = _accountService.GetMainKey(message.ReceiverId);
+                RSAReceiver.FromXmlString(RSAReceiverKeyString);
+
+                string RSASenderKeyString = _accountService.GetComainKey(senderId);
+                RSACryptoServiceProvider RSASender = new RSACryptoServiceProvider();
+                RSASender.FromXmlString(RSASenderKeyString);
 
                 foreach (var messagePart in dividedMessage)
                 {
                     string messagePartJson = JsonConvert.SerializeObject(messagePart);
-                    // Encrypt message with receiver's public key
-                    
-                    // todo: also encrypt with sender's private key 
+
+
+                    // Encrypt message with receiver's main public key
                     byte[] firstEncryptionData = _cryptoService.
                         EncryptMessage(ByteEncoder.GetBytes(messagePartJson),
-                        RSA.ExportParameters(false));
-                    encryptedMessageParts.Add(firstEncryptionData);
+                        RSAReceiver.ExportParameters(false));
+
+                    // Encrypt second time with sender's private comain key
+                    byte[] secondEncryption = _cryptoService.
+                        EncryptMessage(firstEncryptionData, 
+                        RSASender.ExportParameters(true));
+
+                    // Add encrypted data to list 
+                    encryptedMessageParts.Add(secondEncryption);
                 }
             }
             return encryptedMessageParts;
