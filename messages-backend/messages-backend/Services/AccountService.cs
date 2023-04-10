@@ -22,12 +22,17 @@ namespace messages_backend.Services
         private readonly ApplicationDbContext _context;
         private readonly AppSettings _appSettings;
         private readonly IMapper _mapper;
+        private readonly ICryptoService _cryptoService;
 
-        public AccountService(ApplicationDbContext context, IOptions<AppSettings> appSettings, IMapper mapper)
+        public AccountService(ApplicationDbContext context, 
+            IOptions<AppSettings> appSettings, 
+            IMapper mapper, 
+            ICryptoService cryptoService)
         {
             this._context = context;
             this._appSettings = appSettings.Value;
             this._mapper = mapper;
+            this._cryptoService = cryptoService;
         }
 
         public AuthResponse Authenticate(AuthenticateRequest request)
@@ -79,6 +84,11 @@ namespace messages_backend.Services
 
             //hash password
             account.PasswordHash = BC.HashPassword(request.Password);
+
+            //generate RSA private keys
+            account.MainRSAKey = _cryptoService.GenerateRSA();
+            account.ComainRSAKey= _cryptoService.GenerateRSA();
+
             _context.Add(account);
             _context.SaveChanges();
             return RegisterEnum.Success;
