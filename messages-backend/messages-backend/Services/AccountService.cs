@@ -19,7 +19,7 @@ namespace messages_backend.Services
         string GetComainKey(Guid userId);
         AuthResponse Authenticate(AuthenticateRequest request);
         RegisterEnum Register(RegisterRequest request);
-        List<AccountResponse> GetAccounts();
+        List<AccountResponse> GetAccounts(Guid id);
     }
     public class AccountService : IAccountService
     {
@@ -62,10 +62,14 @@ namespace messages_backend.Services
             return response;
         }
 
-        public List<AccountResponse> GetAccounts()
+        public List<AccountResponse> GetAccounts(Guid id)
         {
-            throw new NotImplementedException();
-        }
+            return _context
+                .Accounts
+                .Where(x => x.Id != id)
+                .Select(x => _mapper.Map<AccountResponse>(x))
+                .ToList();
+        }        
 
         public string GetComainKey(Guid userId)
         {

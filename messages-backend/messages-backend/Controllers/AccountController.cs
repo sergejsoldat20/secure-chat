@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using messages_backend.Data;
+using messages_backend.Helpers;
 using messages_backend.Models.DTO;
+using messages_backend.Models.Entities;
 using messages_backend.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -45,6 +47,18 @@ namespace messages_backend.Controllers
             {
                 return BadRequest(new { message = "Error" });
             }
+        }
+
+        [Authorize]
+        [HttpGet("users")]
+        public ActionResult<AccountResponse> GetAccounts()
+        {
+            var accounts = _accountService.GetAccounts(Account.Id);
+            if (accounts == null)
+            {
+                return NotFound();
+            }
+            return Ok(accounts);
         }
     }
 }

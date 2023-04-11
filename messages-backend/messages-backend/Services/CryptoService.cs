@@ -9,6 +9,8 @@ namespace messages_backend.Services
         byte[] DecryptMessage(byte[] encryptedPart, RSAParameters RSAKeyInfo);
         byte[] EncryptMessage(byte[] messagePart, RSAParameters RSAKeyInfo);
         string GenerateRSA();
+
+        
       
     }
     public class CryptoService : ICryptoService
