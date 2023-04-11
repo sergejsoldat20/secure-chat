@@ -26,7 +26,7 @@ builder.Services.AddSingleton<AppSettings>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<ICryptoService, CryptoService>();
 builder.Services.AddScoped<IMessagesService, MessagesService>();
-builder.Services.AddScoped<ISteganographyService, SteganographyService>();
+/// builder.Services.AddScoped<ISteganographyService, SteganographyService>();
 
 var app = builder.Build();
 

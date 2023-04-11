@@ -28,7 +28,7 @@ namespace messages_backend.Controllers
         public IActionResult SendMessage(SendMessage payload) 
         {
             // message will be divided and encrypted with RSA
-            var messagePartsEncrypted =  _messagesService.GetEncryptedMessageParts(payload, Account.Id);
+           
             
             // todo: send this parts to M servers
             return Ok();
@@ -37,7 +37,7 @@ namespace messages_backend.Controllers
         [HttpGet("test-divide")]
         public ActionResult<List<MessagePartition>> DivideMessage()
         {
-            return Ok(_messagesService.DivideMessage("test chat message"));
+            return Ok(_messagesService.DivideAndEncrypt("test chat message", Account.Id));
         }
 
 
@@ -55,6 +55,13 @@ namespace messages_backend.Controllers
         {
             // todo: get messages for chat by user id
             return Ok();
+        }
+
+        [HttpPost("one-message")]
+        public ActionResult<Message> TestMessage(SendMessage payload)
+        {
+            var divided = _messagesService.DivideAndEncrypt("jebem vam majku svima pocevsi od ....", payload.ReceiverId);
+            return Ok(_messagesService.ComposeMessage(divided, payload.ReceiverId, Account.Id));
         }
        
     }

@@ -13,8 +13,7 @@ namespace messages_backend.Services
         List<MessagePartition> DivideMessage(string message);
         Message ComposeMessage(List<MessagePartition> dividedMessage, Guid recieverId, Guid senderId);
         void SaveMessage(Message message);
-        List<byte[]> GetEncryptedMessageParts(SendMessage message, Guid senderId);
-        MessagePartition DecryptMessagePart(byte[] encryptedData, Guid senderId, Guid receiverId);
+        List<MessagePartition> DivideAndEncrypt(string message, Guid id);
     }
 
     public class MessagesService : IMessagesService
@@ -35,35 +34,53 @@ namespace messages_backend.Services
         public Message ComposeMessage(List<MessagePartition> dividedMessage,
             Guid recieverId, Guid senderId)
         {
-            string messageText = string.Join("", dividedMessage.OrderBy(x => x.CurrentPart).ToList().Select(x => x.MessagePart));
-            var message = new Message
+            using (RSACryptoServiceProvider RSA = new RSACryptoServiceProvider())
             {
-                RecieverId = recieverId,
-                SenderId = senderId,
-                Text = messageText
-            };
-            return message;
-        }
+                string rsaKeyString = _accountService.GetMainKey(recieverId);
+                RSA.FromXmlString(rsaKeyString);
 
-        public MessagePartition DecryptMessagePart(byte[] encryptedData, Guid senderId, Guid receiverId)
+                string base64Message = string.Join("", dividedMessage
+                    .OrderBy(x => x.CurrentPart)
+                    .Select(x => x.MessagePart)
+                    .ToList());
+
+                byte[] decryptedMessage = _cryptoService.DecryptMessage(
+                    System.Convert.FromBase64String(base64Message),
+                    RSA.ExportParameters(true));
+
+                return new Message
+                {
+                    Text = Encoding.UTF8.GetString(decryptedMessage),
+                    SenderId = senderId,
+                    RecieverId = recieverId
+                };
+            }
+        }   
+
+        public List<MessagePartition> DivideAndEncrypt(string message, Guid id)
         {
             
-            string RSAReceiverKeyString = _accountService.GetMainKey(receiverId);
-
-            using (RSACryptoServiceProvider RSAReceiver = new RSACryptoServiceProvider())
+            var result = new List<MessagePartition>();
+            using (RSACryptoServiceProvider rsa = new RSACryptoServiceProvider())
             {
-                RSAReceiver.FromXmlString(RSAReceiverKeyString);
+                string rsaKeyString = _accountService.GetMainKey(id);
+                rsa.FromXmlString(rsaKeyString);
 
-                // Decrypt one message part with receiver's private key
-                byte[] firstDecryption = _cryptoService
-                    .DecryptMessage(encryptedData, 
-                    RSAReceiver.ExportParameters(true));
+                byte[] signature = _cryptoService.SignMessagePartition(message, id, rsaKeyString);
 
-                /*byte[] secondDecryption = _cryptoService
-                    .DecryptMessage(firstDecryption, RSAReceiver.ExportParameters(true));*/
+                if (_cryptoService.VerifyMessagePartition(signature, message, id, rsaKeyString))
+                {
+                    Console.WriteLine("VERIFY RADIIIIIII +++++++++");
+                }
 
-                return JsonConvert.DeserializeObject<MessagePartition>(Encoding.UTF8.GetString(firstDecryption));
+                byte[] encryptedMessage = _cryptoService.
+                    EncryptMessage(Encoding.UTF8.GetBytes(message), rsa.ExportParameters(false));
+                 string messageBase64 = System.Convert.ToBase64String(encryptedMessage);
+                result = DivideMessage(messageBase64);
+
+                return result;
             }
+            
         }
 
         public List<MessagePartition> DivideMessage(string message)
@@ -90,41 +107,6 @@ namespace messages_backend.Services
                 });
             }
             return result;
-        }
-
-        public List<byte[]> GetEncryptedMessageParts(SendMessage message, Guid senderId)
-        {
-            // UnicodeEncoding ByteEncoder = new UnicodeEncoding();
-            var dividedMessage = DivideMessage(message.Text);
-            var encryptedMessageParts = new List<byte[]>();    
-            using (RSACryptoServiceProvider RSAReceiver = new RSACryptoServiceProvider())
-            {
-                string RSAReceiverKeyString = _accountService.GetMainKey(message.ReceiverId);
-                RSAReceiver.FromXmlString(RSAReceiverKeyString);
-
-                string RSASenderKeyString = _accountService.GetComainKey(senderId);
-                RSACryptoServiceProvider RSASender = new RSACryptoServiceProvider();
-                RSASender.FromXmlString(RSASenderKeyString);
-
-                foreach (var messagePart in dividedMessage)
-                {
-                    string messagePartJson = JsonConvert.SerializeObject(messagePart);
-
-
-                    // Encrypt message with receiver's main public key
-                    byte[] firstEncryptionData = _cryptoService
-                        .EncryptMessage(Encoding.UTF8.GetBytes(messagePartJson),
-                        RSAReceiver.ExportParameters(false));
-
-                    // Can't encrypt with sender's private key 
-                    
-
-                    // Add encrypted data to list 
-                    encryptedMessageParts.Add(firstEncryptionData);
-                }
-                return encryptedMessageParts;
-            }
-            
         }
 
         public void SaveMessage(Message message)
