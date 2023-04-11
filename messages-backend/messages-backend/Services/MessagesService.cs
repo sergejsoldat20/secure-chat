@@ -66,13 +66,6 @@ namespace messages_backend.Services
                 string rsaKeyString = _accountService.GetMainKey(id);
                 rsa.FromXmlString(rsaKeyString);
 
-                byte[] signature = _cryptoService.SignMessagePartition(message, id, rsaKeyString);
-
-                if (_cryptoService.VerifyMessagePartition(signature, message, id, rsaKeyString))
-                {
-                    Console.WriteLine("VERIFY RADIIIIIII +++++++++");
-                }
-
                 byte[] encryptedMessage = _cryptoService.
                     EncryptMessage(Encoding.UTF8.GetBytes(message), rsa.ExportParameters(false));
                  string messageBase64 = System.Convert.ToBase64String(encryptedMessage);

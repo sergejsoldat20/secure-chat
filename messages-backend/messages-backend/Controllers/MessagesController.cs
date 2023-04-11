@@ -60,9 +60,8 @@ namespace messages_backend.Controllers
         [HttpPost("one-message")]
         public ActionResult<Message> TestMessage(SendMessage payload)
         {
-            var divided = _messagesService.DivideAndEncrypt("jebem vam majku svima pocevsi od ....", payload.ReceiverId);
+            var divided = _messagesService.DivideAndEncrypt(payload.Text, payload.ReceiverId);
             return Ok(_messagesService.ComposeMessage(divided, payload.ReceiverId, Account.Id));
         }
-       
     }
 }
