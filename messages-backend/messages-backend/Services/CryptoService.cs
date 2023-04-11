@@ -6,14 +6,14 @@ namespace messages_backend.Services
 {
     public interface ICryptoService
     {
-        string DecryptMessage(byte[] encryptedPart, RSAParameters RSAKeyInfo);
+        byte[] DecryptMessage(byte[] encryptedPart, RSAParameters RSAKeyInfo);
         byte[] EncryptMessage(byte[] messagePart, RSAParameters RSAKeyInfo);
         string GenerateRSA();
       
     }
     public class CryptoService : ICryptoService
     {
-        public string DecryptMessage(byte[] encryptedPart, RSAParameters RSAKeyInfo)
+        public byte[] DecryptMessage(byte[] encryptedPart, RSAParameters RSAKeyInfo)
         {
             UnicodeEncoding ByteConverter = new UnicodeEncoding();
 
@@ -26,7 +26,7 @@ namespace messages_backend.Services
                     RSA.ImportParameters(RSAKeyInfo);
                     decryptedData = RSA.Decrypt(encryptedPart, false);
                 }
-                return ByteConverter.GetString(decryptedData);
+                return decryptedData;
             }
             catch (Exception ex)
             {

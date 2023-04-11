@@ -1,6 +1,7 @@
 ﻿using messages_backend.Data;
 using messages_backend.Models.DTO;
 using messages_backend.Models.Entities;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 using Newtonsoft.Json;
 using System.Security.Cryptography;
 using System.Text;
@@ -18,7 +19,6 @@ namespace messages_backend.Services
 
     public class MessagesService : IMessagesService
     {
-
         private readonly ApplicationDbContext _context;
         private readonly IAccountService _accountService;
         private readonly ICryptoService _cryptoService;
@@ -47,7 +47,23 @@ namespace messages_backend.Services
 
         public MessagePartition DecryptMessagePart(byte[] encryptedData, Guid senderId, Guid receiverId)
         {
-            throw new NotImplementedException();
+            
+            string RSAReceiverKeyString = _accountService.GetMainKey(receiverId);
+
+            using (RSACryptoServiceProvider RSAReceiver = new RSACryptoServiceProvider())
+            {
+                RSAReceiver.FromXmlString(RSAReceiverKeyString);
+
+                // Decrypt one message part with receiver's private key
+                byte[] firstDecryption = _cryptoService
+                    .DecryptMessage(encryptedData, 
+                    RSAReceiver.ExportParameters(true));
+
+                /*byte[] secondDecryption = _cryptoService
+                    .DecryptMessage(firstDecryption, RSAReceiver.ExportParameters(true));*/
+
+                return JsonConvert.DeserializeObject<MessagePartition>(Encoding.UTF8.GetString(firstDecryption));
+            }
         }
 
         public List<MessagePartition> DivideMessage(string message)
@@ -78,7 +94,7 @@ namespace messages_backend.Services
 
         public List<byte[]> GetEncryptedMessageParts(SendMessage message, Guid senderId)
         {
-            UnicodeEncoding ByteEncoder = new UnicodeEncoding();
+            // UnicodeEncoding ByteEncoder = new UnicodeEncoding();
             var dividedMessage = DivideMessage(message.Text);
             var encryptedMessageParts = new List<byte[]>();    
             using (RSACryptoServiceProvider RSAReceiver = new RSACryptoServiceProvider())
@@ -96,20 +112,19 @@ namespace messages_backend.Services
 
 
                     // Encrypt message with receiver's main public key
-                    byte[] firstEncryptionData = _cryptoService.
-                        EncryptMessage(ByteEncoder.GetBytes(messagePartJson),
+                    byte[] firstEncryptionData = _cryptoService
+                        .EncryptMessage(Encoding.UTF8.GetBytes(messagePartJson),
                         RSAReceiver.ExportParameters(false));
 
-                    // Encrypt second time with sender's private comain key
-                    byte[] secondEncryption = _cryptoService.
-                        EncryptMessage(firstEncryptionData, 
-                        RSASender.ExportParameters(true));
+                    // Can't encrypt with sender's private key 
+                    
 
                     // Add encrypted data to list 
-                    encryptedMessageParts.Add(secondEncryption);
+                    encryptedMessageParts.Add(firstEncryptionData);
                 }
+                return encryptedMessageParts;
             }
-            return encryptedMessageParts;
+            
         }
 
         public void SaveMessage(Message message)
@@ -120,7 +135,5 @@ namespace messages_backend.Services
                 _context.SaveChanges();
             }
         }
-
-
     }
 }

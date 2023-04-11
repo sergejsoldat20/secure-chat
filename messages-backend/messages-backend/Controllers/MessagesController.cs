@@ -25,13 +25,17 @@ namespace messages_backend.Controllers
         }
 
         [HttpPost("send-message")]
-        public IActionResult SendMessage(SendMessage payload) 
+        public ActionResult<List<MessagePartition>> SendMessage(SendMessage payload) 
         {
             // message will be divided and encrypted twice with RSA
             var messagePartsEncrypted =  _messagesService.GetEncryptedMessageParts(payload, Account.Id);
-
+            var response = new List<MessagePartition>();
+            foreach (var part in messagePartsEncrypted)
+            {
+                response.Add(_messagesService.DecryptMessagePart(part, Account.Id, payload.ReceiverId));
+            }
             // todo: send this parts to M servers
-            return Ok();
+            return Ok(response);
         }
 
         [HttpGet("test-divide")]
