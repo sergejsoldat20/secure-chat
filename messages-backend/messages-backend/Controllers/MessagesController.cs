@@ -17,37 +17,34 @@ namespace messages_backend.Controllers
         private readonly IMessagesService _messagesService;
         private readonly ICryptoService _cryptoService;
 
-        public MessagesController(IMessagesService messagesService, 
+        public MessagesController(IMessagesService messagesService,
             ICryptoService cryptoService)
         {
             _messagesService = messagesService;
-            _cryptoService= cryptoService;
+            _cryptoService = cryptoService;
         }
 
         [HttpPost("send-message")]
-        public IActionResult SendMessage(SendMessage payload) 
+        public IActionResult SendMessage(SendMessage payload)
         {
             // message will be divided and encrypted with RSA
-           
-            
+
+
             // todo: send this parts to M servers
-            return Ok();
+            return Ok(_messagesService.DivideAndEncrypt(payload.Text, payload.ReceiverId, Account.Id));
         }
 
         [HttpGet("test-divide")]
         public ActionResult<List<MessagePartition>> DivideMessage()
         {
-            return Ok(_messagesService.DivideAndEncrypt("test chat message", Account.Id));
+            return Ok();
         }
 
 
         [HttpGet("test-compose")]
-        public ActionResult<string> ComposeMessage() 
+        public ActionResult<string> ComposeMessage()
         {
-            return _messagesService
-                .ComposeMessage(_messagesService.
-                DivideMessage("test chat message"), 
-                new Guid(), new Guid()).Text;
+            return Ok();
         }
 
         [HttpGet("messages-for-chat/{id}")]
@@ -60,7 +57,7 @@ namespace messages_backend.Controllers
         [HttpPost("one-message")]
         public ActionResult<Message> TestMessage(SendMessage payload)
         {
-            var divided = _messagesService.DivideAndEncrypt(payload.Text, payload.ReceiverId);
+            var divided = _messagesService.DivideAndEncrypt(payload.Text, payload.ReceiverId, Account.Id);
             return Ok(_messagesService.ComposeMessage(divided, payload.ReceiverId, Account.Id));
         }
     }

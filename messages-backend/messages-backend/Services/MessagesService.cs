@@ -1,4 +1,5 @@
 ﻿using messages_backend.Data;
+using messages_backend.Helpers;
 using messages_backend.Models.DTO;
 using messages_backend.Models.Entities;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
@@ -10,10 +11,10 @@ namespace messages_backend.Services
 {
     public interface IMessagesService
     {
-        List<MessagePartition> DivideMessage(string message);
+        List<MessagePartition> DivideMessage(string message, Guid receiverId, Guid senderId, string signature);
         Message ComposeMessage(List<MessagePartition> dividedMessage, Guid recieverId, Guid senderId);
         void SaveMessage(Message message);
-        List<MessagePartition> DivideAndEncrypt(string message, Guid id);
+        List<MessagePartition> DivideAndEncrypt(string message, Guid receiverId, Guid senderId);
     }
 
     public class MessagesService : IMessagesService
@@ -23,7 +24,7 @@ namespace messages_backend.Services
         private readonly ICryptoService _cryptoService;
 
         public MessagesService(ApplicationDbContext context,
-            IAccountService accountService, 
+            IAccountService accountService,
             ICryptoService cryptoService)
         {
             _context = context;
@@ -48,35 +49,59 @@ namespace messages_backend.Services
                     System.Convert.FromBase64String(base64Message),
                     RSA.ExportParameters(true));
 
-                return new Message
+                // read sender private key and verify signature 
+                string senderKeyString = _accountService.GetMainKey(senderId);
+
+                // get signature from first element
+                byte[] signature = System.Convert.FromBase64String(dividedMessage.First().Signature);
+
+                // if signature is verified return message
+                if (_cryptoService.VerifyMessagePartition(signature,
+                    Encoding.UTF8.GetString(decryptedMessage),
+                    senderId, senderKeyString))
                 {
-                    Text = Encoding.UTF8.GetString(decryptedMessage),
-                    SenderId = senderId,
-                    RecieverId = recieverId
-                };
+                    return new Message
+                    {
+                        Text = Encoding.UTF8.GetString(decryptedMessage),
+                        SenderId = senderId,
+                        RecieverId = recieverId
+                    };
+
+                }
+                else 
+                {
+                    throw new AppException("Signature is not verified!");
+                }
             }
-        }   
-
-        public List<MessagePartition> DivideAndEncrypt(string message, Guid id)
-        {
-            
-            var result = new List<MessagePartition>();
-            using (RSACryptoServiceProvider rsa = new RSACryptoServiceProvider())
-            {
-                string rsaKeyString = _accountService.GetMainKey(id);
-                rsa.FromXmlString(rsaKeyString);
-
-                byte[] encryptedMessage = _cryptoService.
-                    EncryptMessage(Encoding.UTF8.GetBytes(message), rsa.ExportParameters(false));
-                 string messageBase64 = System.Convert.ToBase64String(encryptedMessage);
-                result = DivideMessage(messageBase64);
-
-                return result;
-            }
-            
         }
 
-        public List<MessagePartition> DivideMessage(string message)
+        public List<MessagePartition> DivideAndEncrypt(string message, Guid receiverId, Guid senderId)
+        {
+
+            var result = new List<MessagePartition>();
+            using (RSACryptoServiceProvider RSA = new RSACryptoServiceProvider())
+            {
+                // get main key from receiver and encrypt with his public key
+                string rsaKeyString = _accountService.GetMainKey(receiverId);
+                RSA.FromXmlString(rsaKeyString);
+
+                byte[] encryptedMessage = _cryptoService.
+                    EncryptMessage(Encoding.UTF8.GetBytes(message), RSA.ExportParameters(false));
+                string messageBase64 = System.Convert.ToBase64String(encryptedMessage);
+
+                // before dividing message sign it with sender's private key
+                string senderKeyString = _accountService.GetMainKey(senderId);
+
+                byte[] signature = _cryptoService.SignMessagePartition(message, senderId, senderKeyString);
+
+                result = DivideMessage(messageBase64, receiverId, senderId, 
+                    System.Convert.ToBase64String(signature));
+                return result;
+            }
+
+        }
+
+        public List<MessagePartition> DivideMessage(string message, Guid receiverId, Guid senderId, string signature)
         {
             Random random = new Random();
             List<MessagePartition> result = new List<MessagePartition>();
@@ -94,9 +119,12 @@ namespace messages_backend.Services
             {
                 result.Add(new MessagePartition
                 {
-                    TotalParts = totalParts,
+                    TotalParts = strings.Count,
                     CurrentPart = i,
-                    MessagePart = strings[i]
+                    MessagePart = strings[i],
+                    SenderId = senderId,
+                    ReceiverId = receiverId,
+                    Signature = signature
                 });
             }
             return result;
