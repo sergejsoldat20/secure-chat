@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "40wJYb8zw1W8THVaGfx/oL120dOUqvPsBAxWcJ1W3mGX2MxVPvOKs5l5y00+YfqSShAkVLMHBPeIwjfRwTQfPg==",
+  "dgSpecHash": "QjnzVcPK1KSfvNVexm5W/9IgkvGaTWJJRsTjnOsldIaVXphCGITGtjL9svPgEibUAhZInE8nDr2pGkarlTJtgw==",
   "success": true,
-  "projectFilePath": "C:\\Users\\serge\\Desktop\\SNI\\Sigurnost-na-internetu\\messages-backend\\messages-backend\\messages-backend.csproj",
+  "projectFilePath": "C:\\Users\\serge\\OneDrive\\Desktop\\SNI\\Sigurnost-na-internetu\\messages-backend\\messages-backend\\messages-backend.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\serge\\.nuget\\packages\\automapper\\12.0.1\\automapper.12.0.1.nupkg.sha512",
     "C:\\Users\\serge\\.nuget\\packages\\automapper.extensions.microsoft.dependencyinjection\\12.0.1\\automapper.extensions.microsoft.dependencyinjection.12.0.1.nupkg.sha512",
@@ -46,6 +46,7 @@
     "C:\\Users\\serge\\.nuget\\packages\\microsoft.netcore.targets\\1.1.0\\microsoft.netcore.targets.1.1.0.nupkg.sha512",
     "C:\\Users\\serge\\.nuget\\packages\\microsoft.openapi\\1.4.3\\microsoft.openapi.1.4.3.nupkg.sha512",
     "C:\\Users\\serge\\.nuget\\packages\\microsoft.sqlserver.server\\1.0.0\\microsoft.sqlserver.server.1.0.0.nupkg.sha512",
+    "C:\\Users\\serge\\.nuget\\packages\\microsoft.visualstudio.azure.containers.tools.targets\\1.17.2\\microsoft.visualstudio.azure.containers.tools.targets.1.17.2.nupkg.sha512",
     "C:\\Users\\serge\\.nuget\\packages\\microsoft.win32.registry\\5.0.0\\microsoft.win32.registry.5.0.0.nupkg.sha512",
     "C:\\Users\\serge\\.nuget\\packages\\microsoft.win32.systemevents\\5.0.0\\microsoft.win32.systemevents.5.0.0.nupkg.sha512",
     "C:\\Users\\serge\\.nuget\\packages\\mono.texttemplating\\2.2.1\\mono.texttemplating.2.2.1.nupkg.sha512",

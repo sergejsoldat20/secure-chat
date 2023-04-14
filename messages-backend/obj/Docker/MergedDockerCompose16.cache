@@ -1,0 +1,88 @@
+name: dockercompose5524025559387944648
+services:
+  messages-backend:
+    build:
+      context: C:\Users\serge\OneDrive\Desktop\SNI\Sigurnost-na-internetu\messages-backend
+      dockerfile: messages-backend/Dockerfile
+      labels:
+        com.microsoft.created-by: visual-studio
+        com.microsoft.visual-studio.project-name: messages-backend
+      target: base
+    container_name: messages-backend
+    entrypoint:
+    - tail
+    - -f
+    - /dev/null
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS: "true"
+      DOTNET_USE_POLLING_FILE_WATCHER: "1"
+      NUGET_FALLBACK_PACKAGES: ""
+    image: messagesbackend:dev
+    labels:
+      com.microsoft.visualstudio.debuggee.arguments: ' --additionalProbingPath /root/.nuget/packages  "/app/bin/Debug/net7.0/messages-backend.dll"'
+      com.microsoft.visualstudio.debuggee.killprogram: /bin/sh -c "if PID=$$(pidof
+        dotnet); then kill $$PID; fi"
+      com.microsoft.visualstudio.debuggee.program: dotnet
+      com.microsoft.visualstudio.debuggee.workingdirectory: /app
+    networks:
+      default: null
+    ports:
+    - mode: ingress
+      target: 80
+      published: "80"
+      protocol: tcp
+    - mode: ingress
+      target: 8000
+      published: "8000"
+      protocol: tcp
+    tty: true
+    volumes:
+    - type: bind
+      source: C:\Users\serge\OneDrive\Desktop\SNI\Sigurnost-na-internetu\messages-backend\messages-backend
+      target: /app
+      bind:
+        create_host_path: true
+    - type: bind
+      source: C:\Users\serge\OneDrive\Desktop\SNI\Sigurnost-na-internetu\messages-backend
+      target: /src
+      bind:
+        create_host_path: true
+    - type: bind
+      source: C:\Users\serge\vsdbg\vs2017u5
+      target: /remote_debugger
+      bind:
+        create_host_path: true
+    - type: bind
+      source: C:\Users\serge\.nuget\packages\
+      target: /root/.nuget/packages
+      read_only: true
+      bind:
+        create_host_path: true
+    - type: bind
+      source: C:\Users\serge\AppData\Roaming/ASP.NET/Https
+      target: /root/.aspnet/https
+      read_only: true
+      bind:
+        create_host_path: true
+    - type: bind
+      source: C:\Users\serge\AppData\Roaming/Microsoft/UserSecrets
+      target: /root/.microsoft/usersecrets
+      read_only: true
+      bind:
+        create_host_path: true
+  messages-backend-1:
+    build:
+      context: C:\Users\serge\OneDrive\Desktop\SNI\Sigurnost-na-internetu\messages-backend
+      dockerfile: messages-backend/Dockerfile
+    image: messagesbackend
+    networks:
+      default: null
+    ports:
+    - mode: ingress
+      target: 8000
+      published: "8001"
+      protocol: tcp
+networks:
+  default:
+    name: dockercompose5524025559387944648_default

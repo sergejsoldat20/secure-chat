@@ -1,0 +1,40 @@
+name: dockercompose5524025559387944648
+services:
+  messages-backend:
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+    image: messagesbackend
+    networks:
+      default: null
+    ports:
+    - mode: ingress
+      target: 80
+      published: "80"
+      protocol: tcp
+  messages-backend-1:
+    build:
+      context: C:\Users\serge\OneDrive\Desktop\SNI\Sigurnost-na-internetu\messages-backend
+      dockerfile: messages-backend/Dockerfile
+    image: messagesbackend
+    networks:
+      default: null
+    ports:
+    - mode: ingress
+      target: 8000
+      published: "8001"
+      protocol: tcp
+  messages-backend-2:
+    build:
+      context: C:\Users\serge\OneDrive\Desktop\SNI\Sigurnost-na-internetu\messages-backend
+      dockerfile: messages-backend/Dockerfile
+    image: messagesbackend
+    networks:
+      default: null
+    ports:
+    - mode: ingress
+      target: 8000
+      published: "8002"
+      protocol: tcp
+networks:
+  default:
+    name: dockercompose5524025559387944648_default

@@ -1,0 +1,47 @@
+version: '3.4'
+
+networks:
+  messages-app:
+
+services:
+  app-database:
+    container_name: SNI_db
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    ports:
+      - "1402:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=NewPassword123
+    networks:
+      - messages-app
+    
+  messages-backend:
+    image: ${DOCKER_REGISTRY-}messagesbackend
+    build:
+      context: .
+      dockerfile: messages-backend/Dockerfile
+    ports:
+      - "8000:80"
+    depends_on:
+      - app-database
+    environment:
+      - DB_HOST=app-database
+      - DB_NAME=SNI_db_v11
+      - DB_SA_PASSWORD=NewPassword123
+    networks:
+      - messages-app
+  messages-backend-1:
+    image: ${DOCKER_REGISTRY-}messagesbackend
+    build:
+      context: .
+      dockerfile: messages-backend/Dockerfile
+    ports:
+      - "8001:80"
+    depends_on:
+      - app-database
+    environment:
+      - DB_HOST=app-database
+      - DB_NAME=SNI_db_v11
+      - DB_SA_PASSWORD=NewPassword123
+    networks:
+      - messages-app

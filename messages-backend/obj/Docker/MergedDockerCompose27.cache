@@ -1,0 +1,46 @@
+name: dockercompose5524025559387944648
+services:
+  app-database:
+    container_name: SNI_db
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: root
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    networks:
+      mess-app: null
+    ports:
+    - mode: ingress
+      target: 1433
+      published: "8002"
+      protocol: tcp
+  messages-backend:
+    build:
+      context: C:\Users\serge\OneDrive\Desktop\SNI\Sigurnost-na-internetu\messages-backend
+      dockerfile: messages-backend/Dockerfile
+    command:
+    - bash
+    - -c
+    - dotnet ef database update
+    depends_on:
+      app-database:
+        condition: service_started
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      DB_HOST: app-database
+      DB_NAME: SNI_db_v1
+      DB_SA_PASSWORD: root
+    image: messagesbackend
+    networks:
+      mess-app: null
+    ports:
+    - mode: ingress
+      target: 80
+      published: "80"
+      protocol: tcp
+    - mode: ingress
+      target: 80
+      published: "8000"
+      protocol: tcp
+networks:
+  mess-app:
+    name: dockercompose5524025559387944648_mess-app
