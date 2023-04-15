@@ -11,6 +11,6 @@ namespace messages_backend.Data
         }
 
         public DbSet<Account> Accounts { get; set; }
-        public DbSet<Message> Messages { get; set; }    
+        public DbSet<Message> Message { get; set; }    
     }
 }

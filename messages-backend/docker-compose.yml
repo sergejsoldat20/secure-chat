@@ -4,6 +4,48 @@ networks:
   messages-app:
 
 services:
+  rabbitmq-1:
+    container_name: rabbitmq-1
+    image: rabbitmq:3-management
+    environment:
+      RABBITMQ_DEFAULT_USER: sergej
+      RABBITMQ_DEFAULT_PASS: NewPassword123
+    volumes:
+      - ./rabbitmq1:/var/lib/rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672
+    networks:
+      - messages-app 
+
+  rabbitmq-2:
+    container_name: rabbitmq-2
+    image: rabbitmq:3-management
+    environment:
+      RABBITMQ_DEFAULT_USER: sergej
+      RABBITMQ_DEFAULT_PASS: NewPassword123
+    volumes:
+      - ./rabbitmq2:/var/lib/rabbitmq
+    ports:
+      - 5673:5672
+      - 15673:15672
+    networks:
+      - messages-app
+   
+  rabbitmq-3:
+    container_name: rabbitmq-3
+    image: rabbitmq:3-management
+    environment:
+      RABBITMQ_DEFAULT_USER: sergej
+      RABBITMQ_DEFAULT_PASS: NewPassword123
+    volumes:
+      - ./rabbitmq3:/var/lib/rabbitmq
+    ports:
+      - 5674:5672
+      - 15674:15672
+      
+    networks:
+      - messages-app
   app-database:
     container_name: SNI_db
     image: mcr.microsoft.com/mssql/server:2019-latest
@@ -24,24 +66,13 @@ services:
       - "8000:80"
     depends_on:
       - app-database
+      - rabbitmq-1 
+      - rabbitmq-2 
+      - rabbitmq-3 
     environment:
       - DB_HOST=app-database
       - DB_NAME=SNI_db_v11
       - DB_SA_PASSWORD=NewPassword123
     networks:
       - messages-app
-  messages-backend-1:
-    image: ${DOCKER_REGISTRY-}messagesbackend
-    build:
-      context: .
-      dockerfile: messages-backend/Dockerfile
-    ports:
-      - "8001:80"
-    depends_on:
-      - app-database
-    environment:
-      - DB_HOST=app-database
-      - DB_NAME=SNI_db_v11
-      - DB_SA_PASSWORD=NewPassword123
-    networks:
-      - messages-app
+    

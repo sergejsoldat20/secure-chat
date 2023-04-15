@@ -115,10 +115,13 @@ namespace messages_backend.Services
                       .Select(g => new string(g.Select(x => x.c).ToArray()))
                       .ToList();
 
+            Guid partitionId = new Guid();
+
             for (int i = 0; i < strings.Count; i++)
             {
                 result.Add(new MessagePartition
                 {
+                    Id = partitionId,
                     TotalParts = strings.Count,
                     CurrentPart = i,
                     MessagePart = strings[i],
@@ -134,8 +137,8 @@ namespace messages_backend.Services
         {
             if (message != null)
             {
-                _context.Messages.Add(message);
-                _context.SaveChanges();
+                 _context.Add(message);
+                 _context.SaveChanges();
             }
         }
     }

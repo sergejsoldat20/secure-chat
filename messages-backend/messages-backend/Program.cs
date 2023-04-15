@@ -1,8 +1,11 @@
 using messages_backend.Data;
 using messages_backend.Helpers;
 using messages_backend.Middleware;
+using messages_backend.RabbitMQ;
 using messages_backend.Services;
 using Microsoft.EntityFrameworkCore;
+using RabbitMQ.Client;
+using RabbitMQ.Client.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +36,40 @@ builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<ICryptoService, CryptoService>();
 builder.Services.AddScoped<IMessagesService, MessagesService>();
 /// builder.Services.AddScoped<ISteganographyService, SteganographyService>();
+
+// add RabbitMQ background service
+// builder.Services.AddHostedService<RabbitMQConsumer>();
+
+builder.Services.AddSingleton<IEnumerable<IConnectionFactory>>(sp =>
+{
+	var factories = new List<IConnectionFactory>
+	{
+		new ConnectionFactory()
+		{  
+			HostName = "rabbitmq-1", 
+			Port = 5672, 
+			UserName = "sergej", 
+			Password = "NewPassword123" 
+		},
+		new ConnectionFactory()
+		{
+			HostName = "rabbitmq-2",
+			Port = 5672,
+			UserName = "sergej",
+			Password = "NewPassword123"
+		},
+		new ConnectionFactory()
+		{
+			HostName = "rabbitmq-3",
+			Port = 5672,
+			UserName = "sergej",
+			Password = "NewPassword123"
+		},
+	};
+	return factories;
+});
+
+builder.Services.AddHostedService<RabbitMQConsumer>();
 
 var app = builder.Build();
 

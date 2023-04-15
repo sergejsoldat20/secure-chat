@@ -160,3 +160,4 @@ C:\Users\serge\OneDrive\Desktop\SNI\Sigurnost-na-internetu\messages-backend\mess
 C:\Users\serge\OneDrive\Desktop\SNI\Sigurnost-na-internetu\messages-backend\messages-backend\obj\Debug\net7.0\messages-backend.pdb
 C:\Users\serge\OneDrive\Desktop\SNI\Sigurnost-na-internetu\messages-backend\messages-backend\obj\Debug\net7.0\messages-backend.genruntimeconfig.cache
 C:\Users\serge\OneDrive\Desktop\SNI\Sigurnost-na-internetu\messages-backend\messages-backend\obj\Debug\net7.0\ref\messages-backend.dll
+C:\Users\serge\OneDrive\Desktop\SNI\Sigurnost-na-internetu\messages-backend\messages-backend\bin\Debug\net7.0\RabbitMQ.Client.dll

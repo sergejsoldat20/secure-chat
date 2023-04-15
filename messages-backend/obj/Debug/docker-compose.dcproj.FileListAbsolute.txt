@@ -25,3 +25,5 @@ C:\Users\serge\OneDrive\Desktop\SNI\Sigurnost-na-internetu\messages-backend\bin\
 C:\Users\serge\OneDrive\Desktop\SNI\Sigurnost-na-internetu\messages-backend\obj\Debug\docker-compose.dcproj.AssemblyReference.cache
 C:\Users\serge\OneDrive\Desktop\SNI\Sigurnost-na-internetu\messages-backend\obj\Debug\docker-compose.dcproj.CoreCompileInputs.cache
 C:\Users\serge\OneDrive\Desktop\SNI\Sigurnost-na-internetu\messages-backend\obj\Debug\docker-compose.dcproj.CopyComplete
+C:\Users\serge\OneDrive\Desktop\SNI\Sigurnost-na-internetu\messages-backend\bin\Debug\RabbitMQ.Client.dll
+C:\Users\serge\OneDrive\Desktop\SNI\Sigurnost-na-internetu\messages-backend\bin\Debug\Newtonsoft.Json.dll

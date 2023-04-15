@@ -1,0 +1,107 @@
+name: dockercompose5524025559387944648
+services:
+  app-database:
+    container_name: SNI_db
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: NewPassword123
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    networks:
+      messages-app: null
+    ports:
+    - mode: ingress
+      target: 1433
+      published: "1402"
+      protocol: tcp
+  messages-backend:
+    build:
+      context: C:\Users\serge\OneDrive\Desktop\SNI\Sigurnost-na-internetu\messages-backend
+      dockerfile: messages-backend/Dockerfile
+    depends_on:
+      app-database:
+        condition: service_started
+      rabbitmq-1:
+        condition: service_started
+      rabbitmq-2:
+        condition: service_started
+      rabbitmq-3:
+        condition: service_started
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      DB_HOST: app-database
+      DB_NAME: SNI_db_v11
+      DB_SA_PASSWORD: NewPassword123
+    image: messagesbackend
+    networks:
+      messages-app: null
+    ports:
+    - mode: ingress
+      target: 80
+      published: "80"
+      protocol: tcp
+    - mode: ingress
+      target: 80
+      published: "8000"
+      protocol: tcp
+  rabbitmq-1:
+    container_name: rabbitmq-1
+    environment:
+      RABBITMQ_DEFAULT_PASS: NewPassword123
+      RABBITMQ_DEFAULT_USER: sergej
+    image: rabbitmq:3-management
+    networks:
+      messages-app: null
+    ports:
+    - mode: ingress
+      target: 5672
+      published: "5672"
+      protocol: tcp
+    volumes:
+    - type: bind
+      source: C:\Users\serge\OneDrive\Desktop\SNI\Sigurnost-na-internetu\messages-backend\rabbitmq1
+      target: /var/lib/rabbitmq
+      bind:
+        create_host_path: true
+  rabbitmq-2:
+    container_name: rabbitmq-2
+    environment:
+      RABBITMQ_DEFAULT_PASS: NewPassword123
+      RABBITMQ_DEFAULT_USER: sergej
+      RABBITMQ_NODE_PORT: "5673"
+    image: rabbitmq:3-management
+    networks:
+      messages-app: null
+    ports:
+    - mode: ingress
+      target: 5673
+      published: "5673"
+      protocol: tcp
+    volumes:
+    - type: bind
+      source: C:\Users\serge\OneDrive\Desktop\SNI\Sigurnost-na-internetu\messages-backend\rabbitmq2
+      target: /var/lib/rabbitmq
+      bind:
+        create_host_path: true
+  rabbitmq-3:
+    container_name: rabbitmq-3
+    environment:
+      RABBITMQ_DEFAULT_PASS: NewPassword123
+      RABBITMQ_DEFAULT_USER: sergej
+      RABBITMQ_NODE_PORT: "5674"
+    image: rabbitmq:3-management
+    networks:
+      messages-app: null
+    ports:
+    - mode: ingress
+      target: 5674
+      published: "5674"
+      protocol: tcp
+    volumes:
+    - type: bind
+      source: C:\Users\serge\OneDrive\Desktop\SNI\Sigurnost-na-internetu\messages-backend\rabbitmq3
+      target: /var/lib/rabbitmq
+      bind:
+        create_host_path: true
+networks:
+  messages-app:
+    name: dockercompose5524025559387944648_messages-app
