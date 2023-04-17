@@ -9,12 +9,13 @@ using RabbitMQ.Client.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
+builder.Services.AddCors();
+var enableBackgroundService = Environment.GetEnvironmentVariable("ENABLE_BACKGORUND_SERVICE");
 var dbHost = Environment.GetEnvironmentVariable("DB_HOST");
 var dbName = Environment.GetEnvironmentVariable("DB_NAME");
 var dbPassword = Environment.GetEnvironmentVariable("DB_SA_PASSWORD");
 // Add services to the container.
-// var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+ // var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 var connectionString = $"Server={dbHost};Initial Catalog={dbName};User ID=sa;Password={dbPassword};TrustServerCertificate=True;";
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString,
@@ -35,7 +36,7 @@ builder.Services.AddSingleton<AppSettings>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<ICryptoService, CryptoService>();
 builder.Services.AddScoped<IMessagesService, MessagesService>();
-/// builder.Services.AddScoped<ISteganographyService, SteganographyService>();
+builder.Services.AddScoped<ISteganographyService, SteganographyService>();
 
 // add RabbitMQ background service
 // builder.Services.AddHostedService<RabbitMQConsumer>();
@@ -68,8 +69,11 @@ builder.Services.AddSingleton<IEnumerable<IConnectionFactory>>(sp =>
 	};
 	return factories;
 });
+if (enableBackgroundService != null && enableBackgroundService.Equals("True")) 
+{
+	builder.Services.AddHostedService<RabbitMQConsumer>();
+}
 
-builder.Services.AddHostedService<RabbitMQConsumer>();
 
 var app = builder.Build();
 
@@ -88,6 +92,13 @@ if (app.Environment.IsDevelopment())
 	app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+// global cors policy
+app.UseCors(x => x
+	.SetIsOriginAllowed(origin => true)
+	.AllowAnyMethod()
+	.AllowAnyHeader()
+	.AllowCredentials());
 
 app.UseMiddleware<ErrorHandlerMiddleware>();
 app.UseMiddleware<JwtMiddleware>();

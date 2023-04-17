@@ -115,7 +115,7 @@ namespace messages_backend.Services
                       .Select(g => new string(g.Select(x => x.c).ToArray()))
                       .ToList();
 
-            Guid partitionId = new Guid();
+            Guid partitionId = Guid.NewGuid();
 
             for (int i = 0; i < strings.Count; i++)
             {

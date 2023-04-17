@@ -70,9 +70,17 @@ services:
       - rabbitmq-2 
       - rabbitmq-3 
     environment:
+      - ENABLE_BACKGORUND_SERVICE=True
       - DB_HOST=app-database
       - DB_NAME=SNI_db_v11
       - DB_SA_PASSWORD=NewPassword123
     networks:
       - messages-app
-    
+  messages-frontend:
+    image: chat-frontend
+    ports:
+      - "3000:3000"  
+    depends_on:
+      - messages-backend
+    networks:
+      - messages-app

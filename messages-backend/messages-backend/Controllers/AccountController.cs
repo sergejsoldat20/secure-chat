@@ -60,5 +60,12 @@ namespace messages_backend.Controllers
             }
             return Ok(accounts);
         }
-    }
+
+		[Authorize]
+		[HttpGet("current-user")]
+		public ActionResult<AccountResponse> GetCurrentUser()
+        { 
+			return Ok(_mapper.Map<AccountResponse>(Account));
+		}
+	}
 }

@@ -17,9 +17,6 @@ namespace messages_backend.Controllers
     [Route("[controller]")]
     public class MessagesController : BaseController
     {
-
-        //public static Dictionary<string, List<MessagePartition>>  messagesReceived = new Dictionary<string, List<MessagePartition>>();
-        // public static 
 		private readonly IEnumerable<IConnectionFactory> _connectionFactories;
 		private readonly IMessagesService _messagesService;
         private readonly ICryptoService _cryptoService;
@@ -71,27 +68,26 @@ namespace messages_backend.Controllers
 			return Ok();
         }
 
-        [HttpPost("one-message")]
-        public ActionResult<Message> TestMessage(SendMessage payload)
+        [HttpGet("chat-messages/{id}")]
+        public ActionResult<List<Message>> GetChatMessages(Guid id)
         {
-            var divided = _messagesService.DivideAndEncrypt(payload.Text, payload.ReceiverId, Account.Id);
-            return Ok(_messagesService.ComposeMessage(divided, payload.ReceiverId, Account.Id));
+            var result = _context
+                .Message
+                .Where(x => x.SenderId == Account.Id && x.RecieverId == id
+                || x.SenderId == id && x.RecieverId == Account.Id)
+                .OrderBy(x => x.CreatedAt)
+                .ToList();
+            return Ok(result);
         }
 
-		[HttpPost("save-message")]
-		public IActionResult SaveMessage(SendMessage payload)
-		{
-            var message = new Message
-            {
-                Id = new Guid(),
-                Text = payload.Text,
-                SenderId = Account.Id,
-                RecieverId = payload.ReceiverId,
-            };
-            _messagesService.SaveMessage(message);
-
-            return Ok();
-
+        [HttpGet("number-of-messages/{id}")]
+        public ActionResult<int> GetNumberOfMessages(Guid id)
+        {
+            var result = _context
+                .Message
+				.Where(x => x.SenderId == Account.Id && x.RecieverId == id)
+                .ToList().Count();  
+            return Ok(result);
 		}
 	}
 }
