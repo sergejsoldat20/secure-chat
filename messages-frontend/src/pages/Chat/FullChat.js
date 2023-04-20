@@ -15,13 +15,7 @@ export default function FullChat() {
   useEffect(() => {
     const intervalId = setInterval(() => {
       // Fetch new messages from your backend API or WebSocket server here
-      chatService.getNumberOfMessages((result) => {
-        setNumberOfMessages(result.data);
-      });
-      if (numberOfMessages > messNum) {
-        loadChatUsers();
-        messNum = numberOfMessages;
-      }
+      loadMessages();
     }, 500); // Fetch messages every second
 
     return () => {

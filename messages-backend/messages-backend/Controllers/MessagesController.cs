@@ -19,19 +19,19 @@ namespace messages_backend.Controllers
     {
 		private readonly IEnumerable<IConnectionFactory> _connectionFactories;
 		private readonly IMessagesService _messagesService;
-        private readonly ICryptoService _cryptoService;
+        private readonly ISteganographyService _steganographyService;
         private readonly Random _random;
         private readonly ApplicationDbContext _context;
 
 
         public MessagesController(IMessagesService messagesService,
-            ICryptoService cryptoService,
+            ISteganographyService steganographyService,
             IEnumerable<IConnectionFactory> connectionFactories,
             ApplicationDbContext context
             )
         {
             _messagesService = messagesService;
-            _cryptoService = cryptoService;
+            _steganographyService = steganographyService;
             _connectionFactories = connectionFactories;
             _random = new Random();   
             _context = context;
@@ -49,8 +49,13 @@ namespace messages_backend.Controllers
         {
             // message will be divided and encrypted with RSA
             var messageParts = _messagesService.DivideAndEncrypt(payload.Text, payload.ReceiverId, Account.Id);
+            var firstPart = messageParts.First();
+            string jsonPart = JsonConvert.SerializeObject(firstPart);
 
-            foreach (var part in messageParts)
+            _steganographyService.Encode(new FileInfo(_steganographyService.GetRandomPhoto()), jsonPart, firstPart.Id);
+
+           // foreach (var part in messageParts)
+            for(int i = 1; i <  messageParts.Count(); i++)
             {
 				// choose one random connection to send message
 				var factory = _connectionFactories.ElementAt(_random.Next(_connectionFactories.Count()));
@@ -60,7 +65,7 @@ namespace messages_backend.Controllers
 				using var channel = connection.CreateModel();
 
 				channel.QueueDeclare(queue: "my_queue", durable: false, exclusive: false, autoDelete: false, arguments: null);
-				var body = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(part));
+				var body = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(messageParts[i]));
 
                 channel.BasicPublish(exchange: "", routingKey: "my_queue", basicProperties: null, body: body);
             }

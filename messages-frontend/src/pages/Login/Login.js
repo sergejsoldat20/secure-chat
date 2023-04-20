@@ -1,6 +1,8 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from "react";
-import { Button, Form, Input, Select, message } from "antd";
+import { LockOutlined, UserOutlined } from "@ant-design/icons";
+import { Button, Form, Input, message } from "antd";
+import { GlobalStyles } from "@mui/system";
 import { Grid } from "@mui/material";
 import authenticate from "../../services/auth.service";
 import { useNavigate } from "react-router-dom";
@@ -21,8 +23,9 @@ export default function Login() {
 
   const onFinishFailed = (errorInfo) => {};
 
-  const onFinish = () => {
-    authenticate.login(auth).then((result) => {
+  const onFinish = (values) => {
+    console.log(auth);
+    authenticate.login(values).then((result) => {
       if (result.status === 200) {
         localStorage.setItem("jwt", result.data.accessToken);
         navigate("/chat");
@@ -32,75 +35,61 @@ export default function Login() {
     });
   };
   return (
-    <Grid alignItems="center" justifyContent="center" className="text-center">
-      <div className="container">
-        <div className="rom">
-          <div className="col-md-6 offset-md-3 border rounder p-4 mt-2 shadow">
-            <h2 className="text-center m-4">Login</h2>
+    <Grid
+      container
+      spacing={0}
+      direction="column"
+      alignItems="center"
+      justifyContent="center"
+    >
+      <div style={{ height: 50 }}></div>
+      <div className="col-md-4 border rounder p-4 mt-2 shadow">
+        <Form
+          name="normal_login"
+          className="login-form col-md-12 text-center p-1"
+          initialValues={{ remember: true }}
+          onFinish={(e) => onFinish(e)}
+        >
+          <GlobalStyles styles={{ Form: { width: 100, height: 150 } }} />
+          <Form.Item
+            style={{
+              width: "100%",
+            }}
+            name="email"
+            // value={email}
+            // onChange={(e) => onInputChange(e)}
+          >
+            <Input
+              prefix={<UserOutlined className="site-form-item-icon" />}
+              placeholder="Email"
+            />
+          </Form.Item>
+          <Form.Item
+            style={{
+              width: "100%",
+            }}
+            name="password"
+          >
+            <Input
+              prefix={<LockOutlined className="site-form-item-icon" />}
+              type="password"
+              // value={password}
+              // onChange={(e) => onInputChange(e)}
+              placeholder="Password"
+            />
+          </Form.Item>
 
-            <div className="card">
-              <div className="card-header">
-                <Grid
-                  container
-                  spacing={0}
-                  direction="column"
-                  alignItems="center"
-                  justifyContent="center"
-                  paddingRight={12}
-                >
-                  <Form
-                    name="basic"
-                    labelCol={{
-                      span: 10,
-                    }}
-                    wrapperCol={{
-                      span: 20,
-                    }}
-                    initialValues={{
-                      remember: true,
-                    }}
-                    onFinish={(e) => onFinish(e)}
-                    onFinishFailed={onFinishFailed}
-                    autoComplete="off"
-                    requiredMark={false}
-                  >
-                    <Form.Item label="Email: ">
-                      <Input
-                        name="email"
-                        value={email}
-                        onChange={(e) => onInputChange(e)}
-                        style={{ width: "300px" }}
-                      />
-                    </Form.Item>
-                    <Form.Item label="Password: ">
-                      <Input
-                        name="password"
-                        value={password}
-                        onChange={(e) => onInputChange(e)}
-                        style={{ width: "300px" }}
-                      />
-                    </Form.Item>
-
-                    <Form.Item
-                      wrapperCol={{
-                        offset: 8,
-                        span: 16,
-                      }}
-                    >
-                      <Button
-                        type="primary"
-                        onClick={onFinish}
-                        style={{ width: "120px" }}
-                      >
-                        Login
-                      </Button>
-                    </Form.Item>
-                  </Form>
-                </Grid>
-              </div>
-            </div>
-          </div>
-        </div>
+          <Form.Item>
+            <Button
+              type="primary"
+              htmlType="submit"
+              className="login-form-button md-4"
+              onClick={onFinish}
+            >
+              Sign in
+            </Button>
+          </Form.Item>
+        </Form>
       </div>
     </Grid>
   );

@@ -7,8 +7,6 @@ import { Button } from "antd";
 export default function Navbar() {
   const logout = () => {
     localStorage.removeItem("jwt");
-    localStorage.removeItem("role");
-    localStorage.removeItem("id");
     navigate("/");
   };
   const login = () => {
@@ -33,11 +31,20 @@ export default function Navbar() {
           Secure chat
         </a>
         <ul className="navbar-nav mr-auto mt-2 mt-lg-0">
-          <li className="nav-item active">
-            <a className="nav-link" href="/chat">
-              Messages <span className="sr-only">(current)</span>
-            </a>
-          </li>
+          {authenticate.checkIfAuthorized() && (
+            <li className="nav-item active">
+              <a className="nav-link" href="/chat">
+                Messages <span className="sr-only">(current)</span>
+              </a>
+            </li>
+          )}
+          {authenticate.checkIfAuthorized() && (
+            <li className="nav-item active">
+              <a className="nav-link" href="/" onClick={logout}>
+                Logout
+              </a>
+            </li>
+          )}
         </ul>
       </div>
     </nav>

@@ -173,13 +173,24 @@ namespace messages_backend.RabbitMQ
 		{
 			
 			int totalParts = partition.TotalParts;
-			if (receivedMessages[partition.Id].Count == totalParts)
+			if (receivedMessages[partition.Id].Count == totalParts - 1)
 			{
+				using (var stegoScope = _serviceScopeFactory.CreateScope())
+				{
+					var steganographyService = stegoScope.ServiceProvider.GetRequiredService<ISteganographyService>();
+					string decodedMessagePartition = steganographyService.Decode(steganographyService.GetPhotoPath(partition.Id));
+					var messagePartition = JsonConvert.DeserializeObject<MessagePartition> (decodedMessagePartition);
+					if (messagePartition != null)
+					{
+						receivedMessages[partition.Id].Add(messagePartition);
+					}
+					steganographyService.DeletePhoto(partition.Id);
+				}
 				using (var scope = _serviceScopeFactory.CreateScope())
 				{
 					var messagesService = scope.ServiceProvider.GetRequiredService<IMessagesService>();
 					Message message = messagesService.ComposeMessage(receivedMessages[partition.Id], partition.ReceiverId, partition.SenderId);
-				    messagesService.SaveMessage(message);
+					messagesService.SaveMessage(message);
 				}
 			}
 		}

@@ -45,8 +45,12 @@ export const CheckIfUser = () => {
   }
 };
 
-export const CheckIfAuthorized = () => {
-  return CheckIfAdmin() || CheckIfUser();
+export const checkIfAuthorized = () => {
+  if (localStorage.getItem("jwt") !== null) {
+    return true;
+  } else {
+    return false;
+  }
 };
 
 export default {
@@ -54,4 +58,5 @@ export default {
   register,
   getChatUsers,
   getCurrentUser,
+  checkIfAuthorized,
 };
