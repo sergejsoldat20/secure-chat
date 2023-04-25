@@ -75,6 +75,25 @@ services:
       - DB_NAME=SNI_db_v11
       - DB_SA_PASSWORD=NewPassword123
     networks:
+      - messages-app 
+  messages-backend-1:
+    image: ${DOCKER_REGISTRY-}messagesbackend
+    build:
+      context: .
+      dockerfile: messages-backend/Dockerfile
+    ports:
+      - "8001:80"
+    depends_on:
+      - app-database
+      - rabbitmq-1 
+      - rabbitmq-2 
+      - rabbitmq-3 
+    environment:
+      - ENABLE_BACKGORUND_SERVICE=False
+      - DB_HOST=app-database
+      - DB_NAME=SNI_db_v11
+      - DB_SA_PASSWORD=NewPassword123
+    networks:
       - messages-app
   messages-frontend:
     image: chat-frontend
